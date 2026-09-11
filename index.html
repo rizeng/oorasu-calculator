@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oorasu Condition Calculator</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8495834625979950" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --bg: #12161c;
+    --panel: #1b212b;
+    --panel2: #232b37;
+    --border: #303b4a;
+    --text: #e6e9ef;
+    --muted: #8b96a6;
+    --accent: #4fb0ff;
+    --good: #4fd67c;
+    --bad: #ff6b6b;
+    --warn: #f5c542;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .lang-switch { display: flex; gap: 4px; flex-shrink: 0; }
+  .lang-switch button {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .lang-switch button.active { color: var(--text); border-color: var(--accent); }
+  .lang-switch button:hover { border-color: var(--accent); }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 4px; }
+  input, select {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+  input[type=number] { width: 90px; }
+  input[type=text] { width: 110px; }
+  button.small {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button.small:hover { border-color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 6px 8px; text-align: left; }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-scroll table, #simResult table, #drawResult table { min-width: 560px; }
+  #simResult, #drawResult { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  thead th { color: var(--muted); font-weight: 500; font-size: 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  .pill {
+    display: inline-block;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .pill-tie {
+    background: rgba(245, 197, 66, 0.15);
+    border-color: var(--warn);
+    color: var(--warn);
+    font-weight: 600;
+  }
+  .dealer-tag { color: #f5c542; font-size: 11px; margin-left: 4px; }
+  .result-card {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .result-card h3 { margin: 0 0 8px; font-size: 14px; }
+  .need-ok { color: var(--good); font-weight: 600; }
+  .need-bad { color: var(--bad); }
+  .need-num { font-weight: 700; font-size: 16px; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 10px; line-height: 1.5; }
+  select#targetRank, select#targetPlayer, select#simWinner, select#simLoser, select#simMethod, select#simHand, select#rulePreset { width: auto; }
+  .muted-col { color: var(--muted); }
+  .rank-badge {
+    display: inline-block;
+    min-width: 20px;
+    text-align: center;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+  }
+  .ad-slot { min-height: 0; }
+  .ad-slot:has(ins) { min-height: 90px; }
+  footer { text-align: center; padding: 8px 0; }
+  footer a { color: var(--muted); font-size: 12px; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    body { padding: 12px; }
+    h1 { font-size: 18px; }
+    .subtitle { font-size: 12px; }
+    section { padding: 12px 14px; }
+    section h2 { font-size: 13px; }
+    .row { gap: 10px; }
+    label { font-size: 12px; }
+    input, select { padding: 8px 10px; font-size: 15px; }
+    input[type=number] { width: 76px; }
+    input[type=text] { width: 96px; }
+    th, td { padding: 6px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-row">
+    <div>
+      <h1 data-i18n="title">Oorasu Condition Calculator</h1>
+      <div class="subtitle" data-i18n="subtitle">Final-hand score requirement calculator for 4-player riichi mahjong &mdash; any scores, rules, or uma.</div>
+    </div>
+    <div class="lang-switch">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="ja">日本語</button>
+      <button type="button" data-lang="zh">中文</button>
+    </div>
+  </div>
+
+  <div class="ad-slot">
+    <!--
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8495834625979950"
+         data-ad-slot="0000000000"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    -->
+  </div>
+
+  <section id="rulesSection">
+    <h2 data-i18n="rules">Rules</h2>
+    <div class="row">
+      <div>
+        <label data-i18n="presetLabel">Preset rules</label>
+        <select id="rulePreset">
+          <option value="mleague" data-i18n="presetMLeague">M-League</option>
+          <option value="saikouisen" data-i18n="presetSaikouisen">Saikouisen</option>
+          <option value="saikouisenClassic" data-i18n="presetSaikouisenClassic">Saikouisen Classic</option>
+          <option value="wrc" data-i18n="presetWrc">WRC</option>
+          <option value="jpmlA" data-i18n="presetJpmlA">JPML A</option>
+        </select>
+      </div>
+      <div>
+        <label data-i18n="returnScore">Return score</label>
+        <input type="number" id="returnScore" value="30000" step="100">
+      </div>
+      <div id="umaFieldWrap">
+        <label data-i18n="uma">Uma (1st, 2nd, 3rd, 4th)</label>
+        <div class="row" id="umaInputs" style="gap:6px;"></div>
+      </div>
+      <div>
+        <label data-i18n="honba">Honba</label>
+        <input type="number" id="honba" value="0" min="0">
+      </div>
+      <div>
+        <label data-i18n="kyotaku">Riichi sticks on table</label>
+        <input type="number" id="kyotaku" value="0" min="0">
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="small" id="resetBtn" data-i18n="reset">Reset game</button>
+      </div>
+    </div>
+    <div class="note" id="umaModeNote" style="display:none; margin-top:8px;"></div>
+    <div id="jpmlAUmaWrap" style="display:none; margin-top:12px;">
+      <div id="jpmlAUmaRows"></div>
+    </div>
+  </section>
+
+  <section id="playersSection">
+    <h2 data-i18n="players">Players</h2>
+    <div class="table-scroll">
+    <table>
+      <thead><tr>
+        <th data-i18n="colDealer">Dealer</th><th data-i18n="colName">Name</th><th data-i18n="colScore">Current score</th><th data-i18n="colRank">Rank</th>
+        <th data-i18n="colPrev">Previous total</th><th data-i18n="colOverall">Overall total</th><th data-i18n="colOverallRank">Overall rank</th>
+      </tr></thead>
+      <tbody id="playersBody"></tbody>
+    </table>
+    </div>
+    <div id="totalCheck" style="margin-top:8px; font-size:13px;"></div>
+    <div class="note" data-i18n="overallNote">"Overall total" = previous total + this game's uma-adjusted result if the current scores held at hand end. Used for the session-wide standings below.</div>
+  </section>
+
+  <section id="targetSection">
+    <h2 data-i18n="condition">Condition to check</h2>
+    <div class="row">
+      <div>
+        <label data-i18n="player">Player</label>
+        <select id="targetPlayer"></select>
+      </div>
+      <div>
+        <label data-i18n="target">Target</label>
+        <select id="targetRank"></select>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultsSection">
+    <h2 data-i18n="resultsHeader">Ron / Tsumo requirements</h2>
+    <div id="results"></div>
+  </section>
+
+  <section id="dealInSection">
+    <h2 data-i18n="dealInHeader">Deal-in tolerance</h2>
+    <div id="dealIn"></div>
+  </section>
+
+  <section id="simSection">
+    <h2 data-i18n="simHeader">Simulate a specific result</h2>
+    <div class="row">
+      <div>
+        <label data-i18n="winner">Winner</label>
+        <select id="simWinner"></select>
+      </div>
+      <div>
+        <label data-i18n="method">Method</label>
+        <select id="simMethod">
+          <option value="ron" data-i18n="ron">Ron</option>
+          <option value="tsumo" data-i18n="tsumo">Tsumo</option>
+        </select>
+      </div>
+      <div id="simLoserWrap">
+        <label data-i18n="offOf">Off of (direct hit)</label>
+        <select id="simLoser"></select>
+      </div>
+      <div id="simAmountWrap">
+        <label id="simAmountLabel" data-i18n="hand">Hand</label>
+        <select id="simHand"></select>
+      </div>
+    </div>
+    <div class="note" id="simNotation"></div>
+    <div id="simResult" style="margin-top:10px;"></div>
+  </section>
+
+  <section id="drawSection">
+    <h2 data-i18n="drawHeader">Exhaustive draw outcome</h2>
+    <div id="drawResult"></div>
+  </section>
+
+  <div class="ad-slot">
+    <!--
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8495834625979950"
+         data-ad-slot="0000000001"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    -->
+  </div>
+
+  <footer>
+    <a href="privacy-policy.html" data-i18n="privacy">Privacy Policy</a>
+  </footer>
+</div>
+
+<script>
+const I18N = {
+  en: {
+    title: 'Oorasu Condition Calculator',
+    subtitle: 'Final-hand score requirement calculator for 4-player riichi mahjong — any scores, rules, or uma.',
+    rules: 'Rules',
+    presetLabel: 'Preset rules',
+    presetMLeague: 'M-League',
+    presetSaikouisen: 'Saikouisen',
+    presetSaikouisenClassic: 'Saikouisen Classic',
+    presetWrc: 'WRC',
+    presetJpmlA: 'JPML A',
+    umaModeJpmlA: 'Uma is calculated per hand from how many players are at/above (positive) vs below (negative) the return score, using the brackets below.',
+    jpmlABracket: (n) => `${n} positive`,
+    returnScore: 'Return score',
+    uma: 'Uma (1st, 2nd, 3rd, 4th)',
+    honba: 'Honba',
+    kyotaku: 'Riichi sticks on table',
+    reset: 'Reset game',
+    players: 'Players',
+    colDealer: 'Dealer', colName: 'Name', colScore: 'Current score', colRank: 'Rank',
+    colPrev: 'Previous total', colOverall: 'Overall total', colOverallRank: 'Overall rank',
+    overallNote: '"Overall total" = previous total + this game\'s uma-adjusted result if the current scores held at hand end. Used for the session-wide standings below.',
+    condition: 'Condition to check',
+    player: 'Player',
+    target: 'Target',
+    resultsHeader: 'Ron / Tsumo requirements',
+    simHeader: 'Simulate a specific result',
+    winner: 'Winner',
+    method: 'Method',
+    ron: 'Ron',
+    tsumo: 'Tsumo',
+    offOf: 'Off of (direct hit)',
+    hand: 'Hand',
+    drawHeader: 'Exhaustive draw outcome',
+    privacy: 'Privacy Policy',
+    dealerTag: 'dealer',
+    topN: (r) => `Top ${r}`,
+    ronFrom: (name) => `Ron from ${name}`,
+    tsumoDealer: 'Tsumo (dealer)',
+    tsumoNonDealer: 'Tsumo (non-dealer)',
+    tieWith: (names) => `tie with ${names}`,
+    and: 'and',
+    or: 'or',
+    resultsNote: 'Only real achievable hand scores (the standard han/fu score table, honba applied on top automatically) are considered. Condition is checked against the overall session standing (previous total + this game). If the winner is dealer, most rulesets continue the hand (renchan) rather than ending the game.',
+    dealInHeader: 'Deal-in tolerance',
+    dealInInto: (name) => `Dealing into ${name}`,
+    simRonNotation: (winner, loser, hand, honbaText, kyotakuText) => `${winner} rons ${loser} for ${hand}${honbaText}${kyotakuText}.`,
+    simTsumoNotation: (winner, tsumoStr, honbaText, kyotakuText) => `${winner} tsumos for ${tsumoStr}${honbaText}${kyotakuText}.`,
+    honbaRonSuffix: (bonus, total) => ` (+${bonus} honba = ${total} total)`,
+    honbaTsumoSuffix: (honba) => ` (+${honba * 100} per payer)`,
+    kyotakuSuffix: (n) => `, plus ${n} riichi stick${n === 1 ? '' : 's'}`,
+    simColPlayer: 'Player', simColScoreAfter: 'Score after', simColRank: 'Rank', simColOverall: 'Overall total', simColOverallRank: 'Overall rank',
+    drawColPlayer: 'Player', drawColTenpai: 'Tenpai?', drawColScoreAfter: 'Score after draw', drawColRank: 'Rank', drawColOverall: 'Overall total', drawColOverallRank: 'Overall rank',
+    drawNoPayments: 'No tenpai payments occur (all players tenpai or all noten).',
+    drawPoolSplit: (t, n, pool) => `${t} tenpai, ${n} noten — pool of ${pool} points split accordingly.`,
+    drawDealerTenpai: ' The dealer is tenpai, so most rulesets continue the hand (renchan) rather than ending the game.',
+    drawDealerNoten: ' The dealer is noten, so the game would typically end here (dealer rotates) under standard rules.',
+    totalCheckOk: (total, pc) => `<span class="need-ok">OK</span> — scores + riichi sticks total ${total}, matching ${pc} × return score.`,
+    totalCheckFail: (total, expected, diff) => `<span class="need-bad">CHECK</span> — scores + riichi sticks total ${total}, expected ${expected} (${diff}).`,
+    names: ['East', 'South', 'West', 'North'],
+  },
+  ja: {
+    title: 'オーラス条件計算機',
+    subtitle: '4人打ち麻雀のオーラス点数条件計算機 — 任意の点数・ルール・ウマに対応。',
+    rules: 'ルール',
+    presetLabel: 'プリセットルール',
+    presetMLeague: 'Mリーグ',
+    presetSaikouisen: '最高位戦',
+    presetSaikouisenClassic: '最高位戦Classic',
+    presetWrc: 'WRC',
+    presetJpmlA: 'JPML A',
+    umaModeJpmlA: 'ウマは局終了時の持ち点が基準点以上（プラス）か未満（マイナス）のプレイヤー数によって、下記のブロックごとに決まります。',
+    jpmlABracket: (n) => `プラス${n}人`,
+    returnScore: '返し点（基準点）',
+    uma: 'ウマ（1位, 2位, 3位, 4位）',
+    honba: '本場',
+    kyotaku: '供託棒',
+    reset: 'ゲームをリセット',
+    players: 'プレイヤー',
+    colDealer: '親', colName: '名前', colScore: '現在点（持ち点）', colRank: '順位',
+    colPrev: '前回までの合計', colOverall: '合計', colOverallRank: '総合順位',
+    overallNote: '「合計」＝前回までの合計＋現在の点数のままオーラスが終わった場合のウマ込み結果。以下のセッション順位判定に使用します。',
+    condition: '判定する条件',
+    player: 'プレイヤー',
+    target: '目標',
+    resultsHeader: 'ロン・ツモ条件',
+    simHeader: '結果をシミュレート',
+    winner: '和了者',
+    method: '方法',
+    ron: 'ロン',
+    tsumo: 'ツモ',
+    offOf: '誰から（直撃）',
+    hand: '手役の点数',
+    drawHeader: '流局結果',
+    privacy: 'プライバシーポリシー',
+    dealerTag: '親',
+    topN: (r) => `${r}位以内`,
+    ronFrom: (name) => `${name}からロン`,
+    tsumoDealer: 'ツモ（親）',
+    tsumoNonDealer: 'ツモ（子）',
+    tieWith: (names) => `${names}と同点`,
+    and: 'かつ',
+    or: 'または',
+    resultsNote: '実際に成立しうる手役の点数（標準の翻符点数表）のみを考慮し、本場は自動的に加算されます。判定はセッション全体の総合順位（前回までの合計＋今局の結果）に対して行われます。和了者が親の場合、多くのルールでは終局せず連荘となります。',
+    dealInHeader: '放銃の許容範囲',
+    dealInInto: (name) => `${name}への放銃`,
+    simRonNotation: (winner, loser, hand, honbaText, kyotakuText) => `${winner}が${loser}から${hand}点でロン${honbaText}${kyotakuText}。`,
+    simTsumoNotation: (winner, tsumoStr, honbaText, kyotakuText) => `${winner}が${tsumoStr}でツモ${honbaText}${kyotakuText}。`,
+    honbaRonSuffix: (bonus, total) => `（本場+${bonus}＝合計${total}）`,
+    honbaTsumoSuffix: (honba) => `（各家+${honba * 100}）`,
+    kyotakuSuffix: (n) => `、供託${n}本を含む`,
+    simColPlayer: 'プレイヤー', simColScoreAfter: '和了後の点数', simColRank: '順位', simColOverall: '合計', simColOverallRank: '総合順位',
+    drawColPlayer: 'プレイヤー', drawColTenpai: '聴牌', drawColScoreAfter: '流局後の点数', drawColRank: '順位', drawColOverall: '合計', drawColOverallRank: '総合順位',
+    drawNoPayments: '聴牌料の支払いは発生しません（全員聴牌または全員ノーテン）。',
+    drawPoolSplit: (t, n, pool) => `聴牌${t}人、ノーテン${n}人 — ${pool}点を人数で分配します。`,
+    drawDealerTenpai: ' 親が聴牌のため、多くのルールでは連荘となり終局しません。',
+    drawDealerNoten: ' 親がノーテンのため、通常はここで終局します（親流れ）。',
+    totalCheckOk: (total, pc) => `<span class="need-ok">OK</span> — 点数と供託の合計${total}は、${pc}×基準点と一致しています。`,
+    totalCheckFail: (total, expected, diff) => `<span class="need-bad">要確認</span> — 点数と供託の合計は${total}ですが、期待値は${expected}です（${diff}）。`,
+    names: ['東', '南', '西', '北'],
+  },
+  zh: {
+    title: '终局条件计算器',
+    subtitle: '四人麻将终局点数条件计算器 — 支持任意点数、规则和名次分（uma）。',
+    rules: '规则',
+    presetLabel: '预设规则',
+    presetMLeague: 'M联赛',
+    presetSaikouisen: '最高位战',
+    presetSaikouisenClassic: '最高位战Classic',
+    presetWrc: 'WRC',
+    presetJpmlA: 'JPML A',
+    umaModeJpmlA: '名次分按每局结束时点数达到（正）或低于（负）基准点的玩家人数，使用下方各组数值计算。',
+    jpmlABracket: (n) => `${n}人为正`,
+    returnScore: '基准点（返点）',
+    uma: '名次分（1位, 2位, 3位, 4位）',
+    honba: '本场数',
+    kyotaku: '台面立直棒',
+    reset: '重置对局',
+    players: '玩家',
+    colDealer: '庄家', colName: '名字', colScore: '当前点数', colRank: '排名',
+    colPrev: '之前累计', colOverall: '总计', colOverallRank: '总排名',
+    overallNote: '“总计” = 之前累计 + 若按当前点数结束本局后的名次分调整结果。用于下方的总排名判断。',
+    condition: '需要检查的条件',
+    player: '玩家',
+    target: '目标',
+    resultsHeader: '荣和/自摸所需点数',
+    simHeader: '模拟指定结果',
+    winner: '和牌者',
+    method: '方式',
+    ron: '荣和',
+    tsumo: '自摸',
+    offOf: '放铳者（直击）',
+    hand: '手牌点数',
+    drawHeader: '流局结果',
+    privacy: '隐私政策',
+    dealerTag: '庄家',
+    topN: (r) => `前${r}名`,
+    ronFrom: (name) => `荣和${name}`,
+    tsumoDealer: '自摸（庄家）',
+    tsumoNonDealer: '自摸（闲家）',
+    tieWith: (names) => `与${names}并列`,
+    and: '且',
+    or: '或',
+    resultsNote: '仅考虑真实可能出现的和牌点数（标准番符点数表），本场分会自动加上。判定基于整场的总排名（之前累计+本局结果）。若和牌者是庄家，大多数规则下本局不会结束，而是连庄。',
+    dealInHeader: '放铳容许范围',
+    dealInInto: (name) => `放铳给${name}`,
+    simRonNotation: (winner, loser, hand, honbaText, kyotakuText) => `${winner}荣和${loser}，点数${hand}${honbaText}${kyotakuText}。`,
+    simTsumoNotation: (winner, tsumoStr, honbaText, kyotakuText) => `${winner}自摸，${tsumoStr}${honbaText}${kyotakuText}。`,
+    honbaRonSuffix: (bonus, total) => `（含本场+${bonus}，合计${total}）`,
+    honbaTsumoSuffix: (honba) => `（各家+${honba * 100}）`,
+    kyotakuSuffix: (n) => `，含${n}根立直棒`,
+    simColPlayer: '玩家', simColScoreAfter: '和牌后点数', simColRank: '排名', simColOverall: '总计', simColOverallRank: '总排名',
+    drawColPlayer: '玩家', drawColTenpai: '听牌?', drawColScoreAfter: '流局后点数', drawColRank: '排名', drawColOverall: '总计', drawColOverallRank: '总排名',
+    drawNoPayments: '不发生听牌罚符（全员听牌或全员未听牌）。',
+    drawPoolSplit: (t, n, pool) => `${t}人听牌，${n}人未听牌 — ${pool}点按人数分配。`,
+    drawDealerTenpai: ' 庄家听牌，多数规则下将连庄，本局不会结束。',
+    drawDealerNoten: ' 庄家未听牌，通常本局将在此结束（庄家轮换）。',
+    totalCheckOk: (total, pc) => `<span class="need-ok">正常</span> — 点数加立直棒总计${total}，与${pc}×基准点相符。`,
+    totalCheckFail: (total, expected, diff) => `<span class="need-bad">需检查</span> — 点数加立直棒总计${total}，预期为${expected}（${diff}）。`,
+    names: ['东', '南', '西', '北'],
+  },
+};
+
+function t(key, ...args) {
+  const v = (I18N[state.lang] || I18N.en)[key];
+  return typeof v === 'function' ? v(...args) : v;
+}
+
+function applyStaticI18n() {
+  document.documentElement.lang = state.lang;
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('.lang-switch button').forEach((btn) => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === state.lang);
+  });
+}
+
+function defaultState() {
+  return {
+    lang: 'en',
+    playerCount: 4,
+    rulePreset: 'saikouisen',
+    returnScore: 30000,
+    uma: [30, 10, -10, -30],
+    umaMode: 'fixed',
+    jpmlAUma: { 0: [8, 4, -4, -8], 1: [12, -1, -3, -8], 2: [8, 4, -4, -8], 3: [8, 3, 1, -12] },
+    honba: 0,
+    kyotaku: 0,
+    dealerIndex: 0,
+    players: [],
+    targetIndex: 0,
+    targetRank: 1,
+    sim: { winnerIndex: 0, method: 'ron', loserIndex: 1, handBase: null },
+  };
+}
+
+let state = defaultState();
+
+let rowRefs = [];
+
+const STORAGE_KEY = 'oorasu-calculator-state-v1';
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.players) || !Array.isArray(parsed.uma) || !parsed.sim) return false;
+    if (!parsed.lang) parsed.lang = 'en';
+    if (!parsed.umaMode) parsed.umaMode = 'fixed';
+    if (!parsed.rulePreset || !RULE_PRESETS[parsed.rulePreset]) parsed.rulePreset = 'saikouisen';
+    if (!parsed.jpmlAUma) parsed.jpmlAUma = defaultState().jpmlAUma;
+    state = parsed;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function displayName(i) {
+  return state.players[i].name || t('names')[i];
+}
+
+function initPlayers() {
+  state.players = t('names').map(() => ({
+    name: '',
+    score: state.returnScore,
+    previousTotal: 0,
+    tenpai: false,
+  }));
+  state.dealerIndex = 0;
+  state.sim.winnerIndex = 0;
+  state.sim.loserIndex = 1;
+}
+initPlayers();
+
+function ranksOf(values) {
+  return values.map((v, i) => 1 + values.filter(o => o > v).length);
+}
+
+function umaArrayFor(rawScores) {
+  if (state.umaMode === 'jpml-a') {
+    const positiveCount = rawScores.filter((s) => s >= state.returnScore).length;
+    return state.jpmlAUma[positiveCount] ?? state.jpmlAUma[3];
+  }
+  return state.uma;
+}
+
+function umaFor(rank, tieCountAtRank, umaArr) {
+  let sum = 0;
+  for (let k = 0; k < tieCountAtRank; k++) sum += umaArr[rank - 1 + k] ?? umaArr[umaArr.length - 1];
+  return sum / tieCountAtRank;
+}
+
+function finalPointsForRaw(rawScores) {
+  const ranks = ranksOf(rawScores);
+  const umaArr = umaArrayFor(rawScores);
+  return rawScores.map((s, i) => {
+    const r = ranks[i];
+    const tieCount = ranks.filter(x => x === r).length;
+    const uma = umaFor(r, tieCount, umaArr);
+    return (s - state.returnScore) / 1000 + uma;
+  });
+}
+
+function overallTotals(rawScores) {
+  const fp = finalPointsForRaw(rawScores);
+  return state.players.map((p, i) => p.previousTotal + fp[i]);
+}
+
+function overallRankSatisfies(rawScores, idx, targetRank) {
+  const overall = overallTotals(rawScores);
+  return ranksOf(overall)[idx] <= targetRank;
+}
+
+function ceil100(x) { return Math.ceil(x / 100) * 100; }
+
+function buildScoreTable() {
+  const FU_LIST = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110];
+  const entries = [];
+  const addEntry = (han, fu, base, label, tsumoLegal = true) => {
+    entries.push({
+      han, fu, base, label, tsumoLegal,
+      x1: ceil100(base * 1),
+      x2: ceil100(base * 2),
+      x4: ceil100(base * 4),
+      x6: ceil100(base * 6),
+    });
+  };
+  for (let han = 1; han <= 4; han++) {
+    for (const fu of FU_LIST) {
+      if (han === 1 && (fu === 20 || fu === 25)) continue;
+      const base = Math.min(fu * Math.pow(2, 2 + han), 2000);
+      const tsumoLegal = !(han === 1 && fu === 110);
+      addEntry(han, fu, base, `${han}han ${fu}fu`, tsumoLegal);
+    }
+  }
+  const brackets = [
+    { han: 5, base: 2000, label: 'Mangan' },
+    { han: 6, base: 3000, label: 'Haneman' },
+    { han: 8, base: 4000, label: 'Baiman' },
+    { han: 11, base: 6000, label: 'Sanbaiman' },
+  ];
+  for (const b of brackets) addEntry(b.han, null, b.base, b.label);
+  const YAKUMAN_LABELS = ['Yakuman', 'Double Yakuman', 'Triple Yakuman', 'Quadruple Yakuman', 'Quintuple Yakuman', 'Sextuple Yakuman'];
+  YAKUMAN_LABELS.forEach((label, i) => addEntry(13 * (i + 1), null, 8000 * (i + 1), label));
+
+  entries.sort((a, b) => a.base - b.base);
+  return entries;
+}
+const SCORE_TABLE = buildScoreTable();
+const TSUMO_SCORE_TABLE = SCORE_TABLE.filter((e) => e.tsumoLegal);
+
+function uniqueByBase(table) {
+  const seen = new Set();
+  return table.filter((e) => {
+    if (seen.has(e.base)) return false;
+    seen.add(e.base);
+    return true;
+  });
+}
+const UNIQUE_SCORE_TABLE = uniqueByBase(SCORE_TABLE);
+const UNIQUE_TSUMO_SCORE_TABLE = uniqueByBase(TSUMO_SCORE_TABLE);
+
+function findMinEntry(testFn, table = SCORE_TABLE) {
+  for (const entry of table) {
+    if (testFn(entry)) return entry;
+  }
+  return null;
+}
+
+function scoresAfterRon(baseScores, winnerIdx, loserIdx, handScore) {
+  const transfer = handScore + 300 * state.honba;
+  const s = baseScores.slice();
+  s[winnerIdx] += transfer + state.kyotaku * 1000;
+  s[loserIdx] -= transfer;
+  return s;
+}
+
+function scoresAfterTsumo(baseScores, winnerIdx, payAmounts) {
+  const s = baseScores.slice();
+  const winnerIsDealer = winnerIdx === state.dealerIndex;
+  let total = 0;
+  for (let i = 0; i < s.length; i++) {
+    if (i === winnerIdx) continue;
+    const pay = (winnerIsDealer ? payAmounts.allPay : (i === state.dealerIndex ? payAmounts.dealerPay : payAmounts.nonDealerPay)) + 100 * state.honba;
+    s[i] -= pay;
+    total += pay;
+  }
+  s[winnerIdx] += total + state.kyotaku * 1000;
+  return s;
+}
+
+function payAmountsFromEntry(entry, winnerIsDealer) {
+  return winnerIsDealer ? { allPay: entry.x2 } : { dealerPay: entry.x2, nonDealerPay: entry.x1 };
+}
+
+function formatTsumoEntry(entry, winnerIsDealer) {
+  return winnerIsDealer
+    ? `${entry.x2.toLocaleString()} all`
+    : `${entry.x1.toLocaleString()}/${entry.x2.toLocaleString()}`;
+}
+
+function rankLabel(r) {
+  return t('topN', r);
+}
+
+function structuralRebuild() {
+  applyStaticI18n();
+  buildUmaInputs();
+  buildPlayersTable();
+  computedRefresh();
+}
+
+function computedRefresh() {
+  updatePlayersDerived();
+  renderTargetSelectors();
+  renderResults();
+  renderDealIn();
+  renderSim();
+  renderDraw();
+  saveState();
+}
+
+function buildUmaInputs() {
+  const el = document.getElementById('umaInputs');
+  el.innerHTML = '';
+  const isJpmlA = state.umaMode === 'jpml-a';
+  document.getElementById('umaFieldWrap').style.display = isJpmlA ? 'none' : '';
+  if (!isJpmlA) {
+    for (let i = 0; i < state.playerCount; i++) {
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.style.width = '55px';
+      inp.value = state.uma[i] ?? 0;
+      inp.addEventListener('input', () => { state.uma[i] = Number(inp.value); computedRefresh(); });
+      el.appendChild(inp);
+    }
+  }
+  const noteEl = document.getElementById('umaModeNote');
+  noteEl.style.display = isJpmlA ? '' : 'none';
+  if (isJpmlA) noteEl.textContent = t('umaModeJpmlA');
+
+  const wrap = document.getElementById('jpmlAUmaWrap');
+  wrap.style.display = isJpmlA ? '' : 'none';
+  if (isJpmlA) buildJpmlAUmaInputs();
+}
+
+function buildJpmlAUmaInputs() {
+  const rows = document.getElementById('jpmlAUmaRows');
+  rows.innerHTML = '';
+  [0, 1, 2, 3].forEach((bracket) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.style.marginBottom = '6px';
+    const label = document.createElement('label');
+    label.style.margin = '0';
+    label.style.minWidth = '90px';
+    label.textContent = t('jpmlABracket', bracket);
+    row.appendChild(label);
+    for (let i = 0; i < state.playerCount; i++) {
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.style.width = '55px';
+      inp.value = state.jpmlAUma[bracket][i];
+      inp.addEventListener('input', () => { state.jpmlAUma[bracket][i] = Number(inp.value); computedRefresh(); });
+      row.appendChild(inp);
+    }
+    rows.appendChild(row);
+  });
+}
+
+function buildPlayersTable() {
+  const body = document.getElementById('playersBody');
+  body.innerHTML = '';
+  rowRefs = [];
+
+  state.players.forEach((p, i) => {
+    const tr = document.createElement('tr');
+
+    const dealerTd = document.createElement('td');
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'dealer';
+    radio.checked = state.dealerIndex === i;
+    radio.addEventListener('change', () => { state.dealerIndex = i; computedRefresh(); });
+    const tag = document.createElement('span');
+    tag.className = 'dealer-tag';
+    tag.textContent = t('dealerTag');
+    dealerTd.appendChild(radio);
+    dealerTd.appendChild(tag);
+    tr.appendChild(dealerTd);
+
+    const nameTd = document.createElement('td');
+    const nameInp = document.createElement('input');
+    nameInp.type = 'text';
+    nameInp.value = p.name;
+    nameInp.placeholder = t('names')[i];
+    nameInp.addEventListener('input', () => { p.name = nameInp.value; computedRefresh(); });
+    nameTd.appendChild(nameInp);
+    tr.appendChild(nameTd);
+
+    const scoreTd = document.createElement('td');
+    const scoreInp = document.createElement('input');
+    scoreInp.type = 'number';
+    scoreInp.step = 100;
+    scoreInp.value = p.score;
+    scoreInp.addEventListener('input', () => { p.score = Number(scoreInp.value); computedRefresh(); });
+    scoreTd.appendChild(scoreInp);
+    tr.appendChild(scoreTd);
+
+    const rankTd = document.createElement('td');
+    const badge = document.createElement('span');
+    badge.className = 'rank-badge';
+    rankTd.appendChild(badge);
+    tr.appendChild(rankTd);
+
+    const prevTd = document.createElement('td');
+    const prevInp = document.createElement('input');
+    prevInp.type = 'number';
+    prevInp.step = 0.1;
+    prevInp.value = p.previousTotal;
+    prevInp.addEventListener('input', () => { p.previousTotal = Number(prevInp.value); computedRefresh(); });
+    prevTd.appendChild(prevInp);
+    tr.appendChild(prevTd);
+
+    const overallTd = document.createElement('td');
+    overallTd.className = 'muted-col';
+    tr.appendChild(overallTd);
+
+    const overallRankTd = document.createElement('td');
+    const obadge = document.createElement('span');
+    obadge.className = 'rank-badge';
+    overallRankTd.appendChild(obadge);
+    tr.appendChild(overallRankTd);
+
+    body.appendChild(tr);
+    rowRefs.push({ dealerTag: tag, rankBadge: badge, overallTd, overallRankBadge: obadge });
+  });
+}
+
+function updatePlayersDerived() {
+  const rawScores = state.players.map(p => p.score);
+  const rawRanks = ranksOf(rawScores);
+  const overall = overallTotals(rawScores);
+  const overallRanks = ranksOf(overall);
+
+  state.players.forEach((p, i) => {
+    const refs = rowRefs[i];
+    if (!refs) return;
+    refs.dealerTag.style.display = state.dealerIndex === i ? '' : 'none';
+    refs.rankBadge.textContent = rawRanks[i];
+    refs.overallTd.textContent = overall[i].toFixed(1);
+    refs.overallRankBadge.textContent = overallRanks[i];
+  });
+
+  const total = rawScores.reduce((s, v) => s + v, 0) + state.kyotaku * 1000;
+  const expected = state.returnScore * state.playerCount;
+  const diff = total - expected;
+  const checkEl = document.getElementById('totalCheck');
+  checkEl.innerHTML = diff === 0
+    ? t('totalCheckOk', total.toLocaleString(), state.playerCount)
+    : t('totalCheckFail', total.toLocaleString(), expected.toLocaleString(), diff > 0 ? '+' + diff.toLocaleString() : diff.toLocaleString());
+}
+
+function renderTargetSelectors() {
+  const playerSel = document.getElementById('targetPlayer');
+  const prevPlayer = state.targetIndex;
+  playerSel.innerHTML = '';
+  state.players.forEach((p, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = displayName(i);
+    playerSel.appendChild(opt);
+  });
+  state.targetIndex = Math.min(prevPlayer, state.playerCount - 1);
+  playerSel.value = state.targetIndex;
+  playerSel.onchange = () => { state.targetIndex = Number(playerSel.value); renderResults(); renderDealIn(); saveState(); };
+
+  const rankSel = document.getElementById('targetRank');
+  const prevRank = state.targetRank;
+  rankSel.innerHTML = '';
+  for (let r = 1; r < state.playerCount; r++) {
+    const opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = rankLabel(r);
+    rankSel.appendChild(opt);
+  }
+  state.targetRank = Math.min(prevRank, state.playerCount - 1);
+  rankSel.value = state.targetRank;
+  rankSel.onchange = () => { state.targetRank = Number(rankSel.value); renderResults(); renderDealIn(); saveState(); };
+}
+
+function tieCountAt(overallArr, idx) {
+  const v = overallArr[idx];
+  return overallArr.filter((x) => Math.abs(x - v) < 1e-6).length;
+}
+
+function tiedWithNames(overallArr, idx) {
+  const v = overallArr[idx];
+  const names = [];
+  state.players.forEach((p, i) => {
+    if (i !== idx && Math.abs(overallArr[i] - v) < 1e-6) names.push(displayName(i));
+  });
+  return names;
+}
+
+function tiedNamesForRun(scoresAfterFn, idx, run) {
+  const names = new Set([
+    ...tiedWithNames(overallTotals(scoresAfterFn(run.start)), idx),
+    ...tiedWithNames(overallTotals(scoresAfterFn(run.end)), idx),
+  ]);
+  return [...names].join(', ');
+}
+
+function isRiskyTie(overallArr, idx, targetRank) {
+  const rank = ranksOf(overallArr)[idx];
+  if (rank > targetRank) return false;
+  const tieCount = tieCountAt(overallArr, idx);
+  return rank + tieCount - 1 > targetRank;
+}
+
+function classifyEntry(scoresAfterFn, idx, targetRank, entry) {
+  const overall = overallTotals(scoresAfterFn(entry));
+  const rank = ranksOf(overall)[idx];
+  if (rank > targetRank) return 'fail';
+  return isRiskyTie(overall, idx, targetRank) ? 'tie' : 'safe';
+}
+
+function classifyRuns(scoresAfterFn, idx, targetRank, table = SCORE_TABLE) {
+  const runs = [];
+  let curStatus = null;
+  let curStart = null;
+  for (let i = 0; i < table.length; i++) {
+    const status = classifyEntry(scoresAfterFn, idx, targetRank, table[i]);
+    if (status !== curStatus) {
+      if (curStatus !== null) runs.push({ status: curStatus, start: table[curStart], end: table[i - 1] });
+      curStatus = status;
+      curStart = i;
+    }
+  }
+  if (curStatus !== null) {
+    runs.push({ status: curStatus, start: table[curStart], end: table[table.length - 1], unbounded: true });
+  }
+  return runs;
+}
+
+function appendRequirementLines(card, scoresAfterFn, idx, targetRank, alreadyOk, valueText, table = SCORE_TABLE) {
+  const runs = classifyRuns(scoresAfterFn, idx, targetRank, table).filter((r) => r.status !== 'fail');
+
+  if (runs.length === 0) {
+    const line = document.createElement('div');
+    if (alreadyOk) {
+      line.innerHTML = `<span class="need-bad">—</span>`;
+      card.appendChild(line);
+    } else {
+      card.appendChild(notAchievableLine());
+    }
+    return;
+  }
+
+  const fullySafe = alreadyOk && runs.length === 1 && runs[0].status === 'safe' &&
+    runs[0].unbounded && runs[0].start.base === table[0].base;
+  if (fullySafe) {
+    const line = document.createElement('div');
+    line.innerHTML = `&ge; <span class="need-num">${valueText(runs[0].start)}</span>`;
+    card.appendChild(line);
+    return;
+  }
+
+  runs.forEach((run, i) => {
+    const div = document.createElement('div');
+    if (i > 0) div.style.marginTop = '2px';
+    const lo = `<span class="need-num">${valueText(run.start)}</span>`;
+    let body = run.unbounded ? `&ge; ${lo}` : `&ge; ${lo} ${t('and')} &le; <span class="need-num">${valueText(run.end)}</span>`;
+    if (i > 0) body = `${t('or')} ` + body;
+    if (run.status === 'tie') {
+      const names = tiedNamesForRun(scoresAfterFn, idx, run);
+      body += ` <span class="pill pill-tie">${t('tieWith', names)}</span>`;
+    }
+    div.innerHTML = body;
+    card.appendChild(div);
+  });
+}
+
+function appendDealInLines(card, scoresAfterFn, idx, targetRank, alreadyOk, valueText, table = SCORE_TABLE) {
+  const runs = alreadyOk ? classifyRuns(scoresAfterFn, idx, targetRank, table).filter((r) => r.status !== 'fail') : [];
+
+  if (runs.length === 0) {
+    const line = document.createElement('div');
+    line.innerHTML = `&le; <span class="need-num">0</span>`;
+    card.appendChild(line);
+    return;
+  }
+
+  runs.forEach((run, i) => {
+    const div = document.createElement('div');
+    if (i > 0) div.style.marginTop = '2px';
+    let body;
+    if (i === 0) {
+      body = `&le; <span class="need-num">${valueText(run.end)}</span>`;
+    } else {
+      const lo = `<span class="need-num">${valueText(run.start)}</span>`;
+      body = run.unbounded ? `&ge; ${lo}` : `&ge; ${lo} ${t('and')} &le; <span class="need-num">${valueText(run.end)}</span>`;
+      body = `${t('or')} ` + body;
+    }
+    if (run.status === 'tie') {
+      const names = tiedNamesForRun(scoresAfterFn, idx, run);
+      body += ` <span class="pill pill-tie">${t('tieWith', names)}</span>`;
+    }
+    div.innerHTML = body;
+    card.appendChild(div);
+  });
+}
+
+function renderResults() {
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+  const baseScores = state.players.map(p => p.score);
+  const idx = state.targetIndex;
+  const targetRank = state.targetRank;
+
+  const currentOverall = overallTotals(baseScores);
+  const currentRank = ranksOf(currentOverall)[idx];
+  const alreadyOk = currentRank <= targetRank;
+
+  const winnerIsDealer = state.dealerIndex === idx;
+
+  state.players.forEach((opp, oi) => {
+    if (oi === idx) return;
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    const h = document.createElement('h3');
+    h.textContent = t('ronFrom', displayName(oi));
+    card.appendChild(h);
+    appendRequirementLines(
+      card,
+      (e) => scoresAfterRon(baseScores, idx, oi, winnerIsDealer ? e.x6 : e.x4),
+      idx, targetRank, alreadyOk,
+      (e) => (winnerIsDealer ? e.x6 : e.x4).toLocaleString()
+    );
+    container.appendChild(card);
+  });
+
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  const h = document.createElement('h3');
+  h.textContent = winnerIsDealer ? t('tsumoDealer') : t('tsumoNonDealer');
+  card.appendChild(h);
+  appendRequirementLines(
+    card,
+    (e) => scoresAfterTsumo(baseScores, idx, payAmountsFromEntry(e, winnerIsDealer)),
+    idx, targetRank, alreadyOk,
+    (e) => formatTsumoEntry(e, winnerIsDealer),
+    TSUMO_SCORE_TABLE
+  );
+  container.appendChild(card);
+
+  const note = document.createElement('div');
+  note.className = 'note';
+  note.textContent = t('resultsNote');
+  container.appendChild(note);
+}
+
+function renderDealIn() {
+  const container = document.getElementById('dealIn');
+  container.innerHTML = '';
+  const baseScores = state.players.map(p => p.score);
+  const idx = state.targetIndex;
+  const targetRank = state.targetRank;
+
+  const currentOverall = overallTotals(baseScores);
+  const currentRank = ranksOf(currentOverall)[idx];
+  const alreadyOk = currentRank <= targetRank;
+
+  state.players.forEach((opp, oi) => {
+    if (oi === idx) return;
+    const winnerIsDealer = oi === state.dealerIndex;
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    const h = document.createElement('h3');
+    h.textContent = t('dealInInto', displayName(oi));
+    card.appendChild(h);
+    appendDealInLines(
+      card,
+      (e) => scoresAfterRon(baseScores, oi, idx, winnerIsDealer ? e.x6 : e.x4),
+      idx, targetRank, alreadyOk,
+      (e) => (winnerIsDealer ? e.x6 : e.x4).toLocaleString()
+    );
+    container.appendChild(card);
+  });
+}
+
+function notAchievableLine() {
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="need-bad">—</span>`;
+  return div;
+}
+
+function renderSim() {
+  const winnerSel = document.getElementById('simWinner');
+  const loserSel = document.getElementById('simLoser');
+  const methodSel = document.getElementById('simMethod');
+  const amountLabel = document.getElementById('simAmountLabel');
+  const loserWrap = document.getElementById('simLoserWrap');
+
+  winnerSel.innerHTML = '';
+  state.players.forEach((p, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = displayName(i);
+    winnerSel.appendChild(opt);
+  });
+  state.sim.winnerIndex = Math.min(state.sim.winnerIndex, state.playerCount - 1);
+  winnerSel.value = state.sim.winnerIndex;
+  winnerSel.onchange = () => {
+    state.sim.winnerIndex = Number(winnerSel.value);
+    if (state.sim.loserIndex === state.sim.winnerIndex) {
+      state.sim.loserIndex = (state.sim.winnerIndex + 1) % state.playerCount;
+    }
+    renderSim();
+    saveState();
+  };
+
+  methodSel.value = state.sim.method;
+  methodSel.onchange = () => { state.sim.method = methodSel.value; renderSim(); saveState(); };
+
+  loserWrap.style.display = state.sim.method === 'ron' ? '' : 'none';
+  loserSel.innerHTML = '';
+  state.players.forEach((p, i) => {
+    if (i === state.sim.winnerIndex) return;
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = displayName(i);
+    loserSel.appendChild(opt);
+  });
+  if (state.sim.loserIndex === state.sim.winnerIndex || state.sim.loserIndex == null) {
+    state.sim.loserIndex = (state.sim.winnerIndex + 1) % state.playerCount;
+  }
+  loserSel.value = state.sim.loserIndex;
+  loserSel.onchange = () => { state.sim.loserIndex = Number(loserSel.value); renderSimResult(); saveState(); };
+
+  amountLabel.textContent = t('hand');
+
+  const winnerIsDealer = state.dealerIndex === state.sim.winnerIndex;
+  const handSel = document.getElementById('simHand');
+  const handTable = state.sim.method === 'ron' ? UNIQUE_SCORE_TABLE : UNIQUE_TSUMO_SCORE_TABLE;
+  handSel.innerHTML = '';
+  handTable.forEach((entry, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = state.sim.method === 'ron'
+      ? `${(winnerIsDealer ? entry.x6 : entry.x4).toLocaleString()}`
+      : formatTsumoEntry(entry, winnerIsDealer);
+    handSel.appendChild(opt);
+  });
+  let matchIdx = handTable.findIndex((e) => e.base === state.sim.handBase);
+  if (matchIdx < 0) matchIdx = 0;
+  handSel.selectedIndex = matchIdx;
+  state.sim.handBase = handTable[matchIdx].base;
+  handSel.onchange = () => {
+    state.sim.handBase = handTable[Number(handSel.value)].base;
+    renderSimResult();
+    saveState();
+  };
+
+  renderSimResult();
+}
+
+function renderSimResult() {
+  const baseScores = state.players.map(p => p.score);
+  const notationEl = document.getElementById('simNotation');
+  const handSel = document.getElementById('simHand');
+  const handTable = state.sim.method === 'ron' ? UNIQUE_SCORE_TABLE : UNIQUE_TSUMO_SCORE_TABLE;
+  const entry = handTable[Number(handSel.value)];
+  let resultScores;
+  if (state.sim.method === 'ron') {
+    const winnerIsDealer = state.dealerIndex === state.sim.winnerIndex;
+    const handScore = winnerIsDealer ? entry.x6 : entry.x4;
+    resultScores = scoresAfterRon(baseScores, state.sim.winnerIndex, state.sim.loserIndex, handScore);
+    const total = handScore + 300 * state.honba;
+    const honbaText = state.honba > 0 ? t('honbaRonSuffix', 300 * state.honba, total.toLocaleString()) : '';
+    const kyotakuText = state.kyotaku > 0 ? t('kyotakuSuffix', state.kyotaku) : '';
+    notationEl.textContent = t('simRonNotation',
+      displayName(state.sim.winnerIndex), displayName(state.sim.loserIndex),
+      handScore.toLocaleString(), honbaText, kyotakuText);
+  } else {
+    const winnerIsDealer = state.dealerIndex === state.sim.winnerIndex;
+    resultScores = scoresAfterTsumo(baseScores, state.sim.winnerIndex, payAmountsFromEntry(entry, winnerIsDealer));
+    const honbaText = state.honba > 0 ? t('honbaTsumoSuffix', state.honba) : '';
+    const kyotakuText = state.kyotaku > 0 ? t('kyotakuSuffix', state.kyotaku) : '';
+    notationEl.textContent = t('simTsumoNotation',
+      displayName(state.sim.winnerIndex), formatTsumoEntry(entry, winnerIsDealer), honbaText, kyotakuText);
+  }
+
+  const rawRanks = ranksOf(resultScores);
+  const overall = overallTotals(resultScores);
+  const overallRanks = ranksOf(overall);
+
+  const container = document.getElementById('simResult');
+  container.innerHTML = '';
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr><th>${t('simColPlayer')}</th><th>${t('simColScoreAfter')}</th><th>${t('simColRank')}</th><th>${t('simColOverall')}</th><th>${t('simColOverallRank')}</th></tr></thead>`;
+  const tbody = document.createElement('tbody');
+  state.players.forEach((p, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${displayName(i)}</td><td>${resultScores[i].toLocaleString()}</td>` +
+      `<td><span class="rank-badge">${rawRanks[i]}</span></td>` +
+      `<td>${overall[i].toFixed(1)}</td>` +
+      `<td><span class="rank-badge">${overallRanks[i]}</span></td>`;
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+function renderDraw() {
+  const container = document.getElementById('drawResult');
+  container.innerHTML = '';
+  const baseScores = state.players.map(p => p.score);
+  const tenpaiFlags = state.players.map(p => p.tenpai);
+  const tenpaiCount = tenpaiFlags.filter(Boolean).length;
+  const notenCount = state.playerCount - tenpaiCount;
+
+  const pool = 3000;
+  let scores = baseScores.slice();
+  if (tenpaiCount > 0 && notenCount > 0) {
+    const perTenpai = pool / tenpaiCount;
+    const perNoten = pool / notenCount;
+    scores = scores.map((s, i) => tenpaiFlags[i] ? s + perTenpai : s - perNoten);
+  }
+
+  const overall = overallTotals(scores);
+  const ranks = ranksOf(scores);
+  const overallRanks = ranksOf(overall);
+
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  thead.innerHTML = `<tr><th>${t('drawColPlayer')}</th><th>${t('drawColTenpai')}</th><th>${t('drawColScoreAfter')}</th><th>${t('drawColRank')}</th><th>${t('drawColOverall')}</th><th>${t('drawColOverallRank')}</th></tr>`;
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  state.players.forEach((p, i) => {
+    const tr = document.createElement('tr');
+
+    const nameTd = document.createElement('td');
+    nameTd.textContent = displayName(i);
+    tr.appendChild(nameTd);
+
+    const tenpaiTd = document.createElement('td');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = p.tenpai;
+    cb.addEventListener('change', () => { p.tenpai = cb.checked; renderDraw(); saveState(); });
+    tenpaiTd.appendChild(cb);
+    tr.appendChild(tenpaiTd);
+
+    const restTd = document.createElement('td');
+    restTd.textContent = scores[i].toLocaleString();
+    tr.appendChild(restTd);
+
+    const rankTd = document.createElement('td');
+    rankTd.innerHTML = `<span class="rank-badge">${ranks[i]}</span>`;
+    tr.appendChild(rankTd);
+
+    const overallTd = document.createElement('td');
+    overallTd.textContent = overall[i].toFixed(1);
+    tr.appendChild(overallTd);
+
+    const overallRankTd = document.createElement('td');
+    overallRankTd.innerHTML = `<span class="rank-badge">${overallRanks[i]}</span>`;
+    tr.appendChild(overallRankTd);
+
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.appendChild(table);
+
+  const note = document.createElement('div');
+  note.className = 'note';
+  let extra = '';
+  if (tenpaiCount === 0 || tenpaiCount === state.playerCount) {
+    extra = t('drawNoPayments');
+  } else {
+    extra = t('drawPoolSplit', tenpaiCount, notenCount, pool);
+  }
+  const dealerContinues = tenpaiFlags[state.dealerIndex];
+  extra += dealerContinues ? t('drawDealerTenpai') : t('drawDealerNoten');
+  note.textContent = extra;
+  container.appendChild(note);
+}
+
+document.getElementById('returnScore').addEventListener('input', (e) => {
+  state.returnScore = Number(e.target.value);
+  computedRefresh();
+});
+document.getElementById('honba').addEventListener('input', (e) => {
+  state.honba = Number(e.target.value);
+  computedRefresh();
+});
+document.getElementById('kyotaku').addEventListener('input', (e) => {
+  state.kyotaku = Number(e.target.value);
+  computedRefresh();
+});
+
+const RULE_PRESETS = {
+  mleague: { returnScore: 25000, uma: [45, 5, -15, -35], umaMode: 'fixed' },
+  saikouisen: { returnScore: 30000, uma: [30, 10, -10, -30], umaMode: 'fixed' },
+  saikouisenClassic: { returnScore: 30000, uma: [12, 4, -4, -12], umaMode: 'fixed' },
+  wrc: { returnScore: 30000, uma: [15, 5, -5, -15], umaMode: 'fixed' },
+  jpmlA: {
+    returnScore: 30000, uma: [8, 4, -4, -8], umaMode: 'jpml-a',
+    jpmlAUma: { 0: [8, 4, -4, -8], 1: [12, -1, -3, -8], 2: [8, 4, -4, -8], 3: [8, 3, 1, -12] },
+  },
+};
+
+function applyPresetValues(presetKey) {
+  const preset = RULE_PRESETS[presetKey];
+  const defaults = defaultState();
+  const jpmlAUma = (preset && preset.jpmlAUma) || defaults.jpmlAUma;
+  state.returnScore = preset ? preset.returnScore : defaults.returnScore;
+  state.uma = (preset ? preset.uma : defaults.uma).slice();
+  state.umaMode = preset ? preset.umaMode : defaults.umaMode;
+  state.jpmlAUma = { 0: jpmlAUma[0].slice(), 1: jpmlAUma[1].slice(), 2: jpmlAUma[2].slice(), 3: jpmlAUma[3].slice() };
+}
+
+document.getElementById('rulePreset').addEventListener('change', (e) => {
+  state.rulePreset = e.target.value;
+  applyPresetValues(state.rulePreset);
+  syncRuleInputs();
+  structuralRebuild();
+});
+
+function syncRuleInputs() {
+  document.getElementById('returnScore').value = state.returnScore;
+  document.getElementById('honba').value = state.honba;
+  document.getElementById('kyotaku').value = state.kyotaku;
+  document.getElementById('rulePreset').value = state.rulePreset;
+}
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  applyPresetValues(state.rulePreset);
+  state.honba = defaultState().honba;
+  state.kyotaku = defaultState().kyotaku;
+  initPlayers();
+  syncRuleInputs();
+  structuralRebuild();
+});
+
+document.querySelectorAll('.lang-switch button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    state.lang = btn.getAttribute('data-lang');
+    saveState();
+    structuralRebuild();
+  });
+});
+
+loadState();
+syncRuleInputs();
+structuralRebuild();
+</script>
+</body>
+</html>
